@@ -7,6 +7,7 @@ var TestHelpers = require('./test_helpers');
 var Fs = require('fs');
 var Hoek = require('hoek');
 var Log = require('../lib/log');
+var Stream = require('stream');
 
 require('./cleanup');
 
@@ -67,7 +68,7 @@ describe('Broadcast', function () {
                     });
                 };
 
-                Broadcast.run(['-l','./test/fixtures/test_01.log','-u', server.info.uri]);
+                Broadcast.run(['-p','./test/fixtures/test_01.log','-u', server.info.uri]);
             });
         });
 
@@ -240,15 +241,15 @@ describe('Broadcast', function () {
 
                 expect(request.payload.events).to.equal('test event');
                 reply(200);
-                done();
             });
 
-            var log = console.log;
+            var write = process.stdout.write;
 
-            console.log = function (value) {
+            process.stdout.write = function (chunk, encoding, cb) {
 
-                expect(value).to.equal(200);
-                console.log = log;
+                process.stdout.write = write;
+                var result = ~~(chunk.toString());
+                expect(result).to.equal(200);
                 done();
             };
 
@@ -294,9 +295,9 @@ describe('Broadcast', function () {
 
     });
 
-    describe('last index', function () {
+    describe('resume', function () {
 
-        it('honors the -p argument', function (done) {
+        it('honors the -r argument', function (done) {
 
             var server = TestHelpers.createTestServer(function (request, reply) {
                 expect(request.payload.events.length).to.equal(2);
@@ -326,8 +327,8 @@ describe('Broadcast', function () {
                 Broadcast.run({
                     path: './test/fixtures/test_01.log',
                     url: server.info.uri,
-                    useLastIndex: true,
-                    lastIndexPath: lastIndex
+                    resume: true,
+                    resumePath: lastIndex
                 });
             });
         });
@@ -362,8 +363,8 @@ describe('Broadcast', function () {
             Broadcast.run({
                 path: './test/fixtures/test_01.log',
                 url: 'http://127.0.0.1:1',
-                useLastIndex: true,
-                lastIndexPath: file
+                resume: true,
+                resumePath: file
             });
 
         });
@@ -448,10 +449,10 @@ describe('Broadcast', function () {
                 init.result = Hoek.clone(init.result);
                 init.result.stats.mtime = new Date();
 
-                Log.get = function (logPath, start, callback) {
+                Log.get = function (path, start, callback) {
 
                     // Start gets reset because the file has changed but the length is the same
-                    expect(logPath).to.equal('./test/fixtures/test_01.log');
+                    expect(path).to.equal('./test/fixtures/test_01.log');
                     expect(start).to.equal(0);
 
                     Log.get = get;
