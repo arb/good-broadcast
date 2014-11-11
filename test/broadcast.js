@@ -1,10 +1,12 @@
 //Load modules
 
+var Fs = require('fs');
+
 var Lab = require('lab');
+var Code = require('code');
 var Broadcast = require('../lib/cli');
 var Utils = require('../lib/utils');
 var TestHelpers = require('./test_helpers');
-var Fs = require('fs');
 var Hoek = require('hoek');
 var Log = require('../lib/log');
 
@@ -14,7 +16,7 @@ require('./cleanup');
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -56,15 +58,15 @@ describe('Broadcast', function () {
                 Utils.recursiveAsync = function (init, iterator, error) {
 
                     expect(init.start).to.equal(0);
-                    expect(init.result.stats).to.exist;
-                    expect(init.previous.stats).to.exist;
+                    expect(init.result.stats).to.exist();
+                    expect(init.previous.stats).to.exist();
 
                     iterator(init, function (error, value) {
 
-                        expect(error).to.not.exist;
+                        expect(error).to.not.exist();
                         expect(value.start).to.equal(503);
-                        expect(init.result.stats).to.exist;
-                        expect(init.previous.stats).to.exist;
+                        expect(init.result.stats).to.exist();
+                        expect(init.previous.stats).to.exist();
 
                         Utils.recursiveAsync = original;
                         Fs.unlinkSync(config);
@@ -184,7 +186,7 @@ describe('Broadcast', function () {
                     wait: 1000
                 }, function (err) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     done();
                 });
             });
@@ -199,7 +201,7 @@ describe('Broadcast', function () {
                 wait: 1000
             }, function (err) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 done();
             });
         });
@@ -211,7 +213,7 @@ describe('Broadcast', function () {
 
             console.error = function (value) {
 
-                expect(value).to.exist;
+                expect(value).to.exist();
                 expect(value.output.statusCode).to.equal(502);
             };
 
@@ -256,8 +258,8 @@ describe('Broadcast', function () {
                 Utils.recursiveAsync = function (init, iterator, callback) {
 
                     expect(init.start).to.equal(0);
-                    expect(init.result.stats).to.exist;
-                    expect(init.previous.stats).to.exist;
+                    expect(init.result.stats).to.exist();
+                    expect(init.previous.stats).to.exist();
 
                     iterator(init, function (value, next) {
 
@@ -368,8 +370,8 @@ describe('Broadcast', function () {
                 Utils.recursiveAsync = function (init, iterator, callback) {
 
                     expect(init.start).to.equal(252);
-                    expect(init.result.stats).to.exist;
-                    expect(init.previous.stats).to.exist;
+                    expect(init.result.stats).to.exist();
+                    expect(init.previous.stats).to.exist();
 
                     iterator(init, function (value, next) {
 
@@ -550,10 +552,10 @@ describe('Broadcast', function () {
 
                     Fs.stat(log, function (err, stat) {
 
-                        expect(err).to.not.exist;
+                        expect(err).to.not.exist();
                         Fs.truncate(log, stat.size, function (err) {
 
-                            expect(err).to.not.exist;
+                            expect(err).to.not.exist();
                             Fs.writeFileSync(log, TestHelpers.inlineLogEntry.lineThree.toString());
                         });
                     });

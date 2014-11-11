@@ -1,7 +1,7 @@
 // Load modules
 
-var Fs = require('fs');
 var ChildProcess = require('child_process');
+var Fs = require('fs');
 var Path = require('path');
 
 // Declare internals

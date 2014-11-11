@@ -1,14 +1,14 @@
 // Load modules
-
-var Lab = require('lab');
 var Util = require('../lib/utils');
+var Code = require('code');
+var Lab = require('lab');
+var lab = exports.lab = Lab.script();
 
 // Test shortcuts
 
-var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
 var describe = lab.describe;
 var it = lab.it;
+var expect = Code.expect;
 
 // Declare internals
 
@@ -41,7 +41,7 @@ describe('Utils', function () {
                 }
             }, function (error) {
 
-                expect(error).to.exist;
+                expect(error).to.exist();
                 expect(count).to.equal(10);
                 done();
             });
@@ -85,7 +85,7 @@ describe('Utils', function () {
                 }
             ], function (err) {
 
-                expect(err).to.not.exist;
+                expect(err).to.not.exist();
                 expect(result).to.deep.equal([1, 2]);
                 done();
             });
@@ -102,7 +102,7 @@ describe('Utils', function () {
                 }
             ], function (err) {
 
-                expect(err).to.be.true;
+                expect(err).to.be.true();
                 done();
             });
         });

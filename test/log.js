@@ -1,15 +1,17 @@
 // Load modules
 
+var Fs = require('fs');
+
+var Code = require('code');
 var Lab = require('lab');
 var Log = require('../lib/log');
-var Fs = require('fs');
 var TestHelpers = require('./test_helpers');
 require('./cleanup');
 
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -51,8 +53,8 @@ describe('Log', function () {
             Log.get('test/fixtures/request.log', 0, function (bytesRead, result) {
 
 
-                expect(bytesRead).to.eql(505);
-                expect(result).to.eql(expectedResult);
+                expect(bytesRead).to.equal(505);
+                expect(result).to.deep.equal(expectedResult);
                 done();
             });
         });
@@ -63,8 +65,8 @@ describe('Log', function () {
             Log.get('test/fixtures/nofile.log', 0, function (bytesRead, result) {
 
                 console.error = trapConsole;
-                expect(bytesRead).to.eql(0);
-                expect(result).to.eql([]);
+                expect(bytesRead).to.equal(0);
+                expect(result).to.be.empty();
                 done();
             });
             console.error = function(string) {
@@ -91,8 +93,8 @@ describe('Log', function () {
             Log.get('test/fixtures/incomplete.log', 0, function (bytesRead, result) {
 
 
-                expect(bytesRead).to.eql(252);
-                expect(result).to.eql(expectedResult);
+                expect(bytesRead).to.equal(252);
+                expect(result).to.deep.equal(expectedResult);
                 done();
             });
         });
@@ -114,7 +116,7 @@ describe('Log', function () {
             Log.get(file, 0, function (bytesRead, result) {
 
                 expect(bytesRead).to.equal(39);
-                expect(result).to.be.empty;
+                expect(result).to.be.empty();
                 done();
             });
         });

@@ -2,6 +2,8 @@
 
 var ChildProcess = require('child_process');
 var Fs = require('fs');
+
+var Code = require('code');
 var Lab = require('lab');
 var Path = require('path');
 var Hoek = require('hoek');
@@ -17,7 +19,7 @@ var internals = {};
 // Test shortcuts
 
 var lab = exports.lab = Lab.script();
-var expect = Lab.expect;
+var expect = Code.expect;
 var describe = lab.describe;
 var it = lab.it;
 
@@ -47,7 +49,7 @@ describe('Broadcast', function () {
             broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
             broadcast.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.not.exist;
+                expect(data.toString()).to.not.exist();
             });
 
             broadcast.once('close', function (code) {
@@ -91,7 +93,7 @@ describe('Broadcast', function () {
             broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
             broadcast.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.not.exist;
+                expect(data.toString()).to.not.exist();
             });
 
             broadcast.once('close', function(code) {
@@ -124,10 +126,10 @@ describe('Broadcast', function () {
 
                 Fs.stat(log, function (err, stat) {
 
-                    expect(err).to.not.exist;
+                    expect(err).to.not.exist();
                     Fs.truncate(log, stat.size, function (err) {
 
-                        expect(err).to.not.exist;
+                        expect(err).to.not.exist();
                         Fs.writeFileSync(log, TestHelpers.inlineLogEntry.lineThree.toString());
                     });
                 });
@@ -153,7 +155,7 @@ describe('Broadcast', function () {
             broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
             broadcast.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.not.exist;
+                expect(data.toString()).to.not.exist();
             });
 
             broadcast.once('close', function(code) {
@@ -199,7 +201,7 @@ describe('Broadcast', function () {
             broadcast1 = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
             broadcast1.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.not.exist;
+                expect(data.toString()).to.not.exist();
             });
 
             broadcast1.once('close', function (code) {
@@ -208,7 +210,7 @@ describe('Broadcast', function () {
                 broadcast2 = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
                 broadcast2.stderr.on('data', function (data) {
 
-                    expect(data.toString()).to.not.exist;
+                    expect(data.toString()).to.not.exist();
                 });
 
                 broadcast2.once('close', function(code) {
@@ -249,7 +251,7 @@ describe('Broadcast', function () {
             broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
             broadcast.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.exist;
+                expect(data.toString()).to.exist();
                 broadcast.kill('SIGUSR2');
             });
 
@@ -337,7 +339,7 @@ describe('Broadcast', function () {
             broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
             broadcast.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.not.exist;
+                expect(data.toString()).to.not.exist();
             });
 
             broadcast.once('close', function (code) {
@@ -376,7 +378,7 @@ describe('Broadcast', function () {
             broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
             broadcast.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.not.exist;
+                expect(data.toString()).to.not.exist();
             });
 
             broadcast.once('close', function(code) {
@@ -444,7 +446,7 @@ describe('Broadcast', function () {
 
             broadcast1.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.not.exist;
+                expect(data.toString()).to.not.exist();
             });
 
             broadcast1.once('close', function (code) {
@@ -455,7 +457,7 @@ describe('Broadcast', function () {
 
                 broadcast2.stderr.on('data', function (data) {
 
-                    expect(data.toString()).to.not.exist;
+                    expect(data.toString()).to.not.exist();
                 });
 
                 broadcast2.once('close', function(code) {
