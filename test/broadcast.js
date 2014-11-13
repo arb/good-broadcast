@@ -2,8 +2,10 @@
 
 var Code = require('code');
 var Fs = require('fs');
+
 var Hoek = require('hoek');
 var Lab = require('lab');
+
 var Broadcast = require('../lib/cli');
 var Log = require('../lib/log');
 var TestHelpers = require('./test_helpers');
@@ -376,7 +378,7 @@ describe('Broadcast', function () {
                         var file = Fs.readFileSync(resume, {
                             encoding: 'utf8'
                         });
-                        expect(file).to.equal('503');
+                        expect(file).to.equal('504');
                         Utils.recursiveAsync = original;
 
                         done();
@@ -509,6 +511,18 @@ describe('Broadcast', function () {
                 url: 'http://127.0.0.1:1'
             });
 
+            var readStream = Fs.createReadStream;
+
+            Fs.createReadStream = function (path, options) {
+
+                expect(path).to.equal('./test/fixtures/test_01.log');
+                expect(options.start).to.equal(0);
+
+                Utils.recursiveAsync = original;
+                Fs.createReadStream = readStream;
+                done();
+                return readStream.apply(this, arguments);
+            };
 
             Utils.recursiveAsync = function (init, iterator, callback) {
 
@@ -517,18 +531,6 @@ describe('Broadcast', function () {
                 // Make a clone so we don't change previous at the same time.
                 init.result = Hoek.clone(init.result);
                 init.result.stats.mtime = new Date();
-
-                Log.get = function (logPath, start, callback) {
-
-                    // Start gets reset because the file has changed but the length is the same
-                    expect(logPath).to.equal('./test/fixtures/test_01.log');
-                    expect(start).to.equal(0);
-
-                    Log.get = get;
-                    Utils.recursiveAsync = original;
-                    done();
-                };
-
                 iterator(init, function () {});
             };
 

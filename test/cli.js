@@ -7,7 +7,7 @@ var Hoek = require('hoek');
 var Lab = require('lab');
 var Path = require('path');
 var TestHelpers = require('./test_helpers');
-require('./cleanup');
+//require('./cleanup');
 
 
 // Declare internals
@@ -103,7 +103,7 @@ describe('Broadcast', function () {
 
             setTimeout(function () {
 
-                stream.write(TestHelpers.inlineLogEntry.lineThree.toString());
+                stream.write('\n' + TestHelpers.inlineLogEntry.lineThree.toString());
                 stream.end();
             }, 300);
         });
@@ -312,7 +312,7 @@ describe('Broadcast', function () {
 
             setTimeout(function () {
 
-                stream.write(TestHelpers.inlineLogEntry.lineThree.toString());
+                stream.write('\n' + TestHelpers.inlineLogEntry.lineThree.toString());
             }, 300);
         });
     });
@@ -355,8 +355,9 @@ describe('Broadcast', function () {
         var broadcast = null;
 
         var stream = Fs.createWriteStream(log, { flags: 'a' });
+        console.log(log);
         stream.write(TestHelpers.inlineLogEntry.lineOne.toString());
-        stream.write(TestHelpers.inlineLogEntry.lineTwo.toString());
+        stream.write('\n' + TestHelpers.inlineLogEntry.lineTwo.toString());
 
         var server = TestHelpers.createTestServer(function (request, reply) {
 
@@ -374,10 +375,12 @@ describe('Broadcast', function () {
                 newOnly: true
             });
 
-            broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
+            //broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
+            broadcast = ChildProcess.spawn('node-debug', [broadcastPath, '-c', config]);
             broadcast.stderr.on('data', function (data) {
 
-                expect(data.toString()).to.not.exist();
+                console.log(data + '');
+                //expect(data.toString()).to.not.exist();
             });
 
             broadcast.once('close', function(code) {
@@ -388,7 +391,7 @@ describe('Broadcast', function () {
 
             setTimeout(function () {
 
-                stream.write(TestHelpers.inlineLogEntry.lineThree.toString());
+                stream.write('\n' + TestHelpers.inlineLogEntry.lineThree.toString());
             }, 300);
         });
     });
