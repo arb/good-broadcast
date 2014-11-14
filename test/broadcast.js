@@ -1,13 +1,11 @@
 //Load modules
-
-var Code = require('code');
 var Fs = require('fs');
 
+var Code = require('code');
 var Hoek = require('hoek');
 var Lab = require('lab');
 
 var Broadcast = require('../lib/cli');
-var Log = require('../lib/log');
 var TestHelpers = require('./test_helpers');
 var Utils = require('../lib/utils');
 require('./cleanup');
@@ -208,8 +206,8 @@ describe('Broadcast', function () {
 
         it('logs an error if there is a problem with Wreck', function (done) {
 
-            var log = console.error;
-            var info = console.info;
+            var consoleError = console.error;
+            var consoleInfo = console.info;
 
             console.error = function (value) {
 
@@ -228,8 +226,8 @@ describe('Broadcast', function () {
                 wait: 1000
             }, function () {
 
-                console.log = log;
-                console.info = info;
+                console.error = consoleError;
+                console.info = consoleInfo;
 
                 done();
             });
@@ -378,7 +376,7 @@ describe('Broadcast', function () {
                         var file = Fs.readFileSync(resume, {
                             encoding: 'utf8'
                         });
-                        expect(file).to.equal('504');
+                        expect(file).to.equal('503');
                         Utils.recursiveAsync = original;
 
                         done();
@@ -504,8 +502,8 @@ describe('Broadcast', function () {
 
         it('uses the newer file if the lengths are the same', function (done) {
 
-            var original = Utils.recursiveAsync;
-            var get = Log.get;
+            var recursive = Utils.recursiveAsync;
+            var series = Utils.series;
             var config = TestHelpers.writeConfig({
                 log: './test/fixtures/test_01.log',
                 url: 'http://127.0.0.1:1'
@@ -513,16 +511,20 @@ describe('Broadcast', function () {
 
             var readStream = Fs.createReadStream;
 
+
             Fs.createReadStream = function (path, options) {
 
                 expect(path).to.equal('./test/fixtures/test_01.log');
                 expect(options.start).to.equal(0);
 
-                Utils.recursiveAsync = original;
+                Utils.recursiveAsync = recursive;
                 Fs.createReadStream = readStream;
-                done();
-                return readStream.apply(this, arguments);
+                var result =  readStream.apply(this, arguments);
+                result.pause();
+                return result;
             };
+
+            Readable.prototype.pipe
 
             Utils.recursiveAsync = function (init, iterator, callback) {
 
@@ -531,7 +533,10 @@ describe('Broadcast', function () {
                 // Make a clone so we don't change previous at the same time.
                 init.result = Hoek.clone(init.result);
                 init.result.stats.mtime = new Date();
-                iterator(init, function () {});
+                iterator(init, function () {
+
+                    done();
+                });
             };
 
             Broadcast.run(['-c', config]);
@@ -597,7 +602,7 @@ describe('Broadcast', function () {
             Utils.recursiveAsync = function (init, iterator, callback) {
 
                 Utils.recursiveAsync = original;
-                expect(init.start).to.equal(502);
+                expect(init.start).to.equal(503);
 
                 done();
             };

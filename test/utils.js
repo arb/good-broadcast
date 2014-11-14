@@ -1,5 +1,7 @@
 // Load modules
 
+var Fs = require('fs');
+
 var Code = require('code');
 var Lab = require('lab');
 var Util = require('../lib/utils');
@@ -106,6 +108,177 @@ describe('Utils', function () {
                 expect(err).to.be.true;
                 done();
             });
+        });
+    });
+
+    describe('Liner', function() {
+
+        it('it transforms a new line file into JSON objects', function (done) {
+
+            var fileStream = Fs.createReadStream('./test/fixtures/test_01.log', { encoding: 'utf8' });
+            var transForm = new Util.Liner();
+            var contents = [];
+
+            transForm.on('readable', function () {
+
+                var line;
+
+                while (line = this.read()) {
+                    contents.push(line);
+                }
+            });
+
+            transForm.on('end', function () {
+
+                expect(this._size).to.equal(503);
+                expect(contents).to.deep.equal([{
+                    event: 'request',
+                    timestamp: 1369328752975,
+                    id: '1369328752975-42369-3828',
+                    instance: 'http://localhost:8080',
+                    labels: [
+                        'api',
+                        'http'
+                    ],
+                    method: 'get',
+                    path: '/test',
+                    query: {},
+                    source: {
+                        remoteAddress: '127.0.0.1'
+                    },
+                    responseTime: 71,
+                    statusCode: 200
+                },
+                {
+                    event: 'request',
+                    timestamp: 1369328753222,
+                    id: '1369328753222-42369-62002',
+                    instance: 'http://localhost:8080',
+                    labels: [
+                        'api',
+                        'http'
+                    ],
+                    method: 'get',
+                    path: '/test',
+                    query: {},
+                    source: {
+                        remoteAddress: '127.0.0.1'
+                    },
+                    responseTime: 9,
+                    statusCode: 200
+                }]);
+                done();
+            });
+
+            fileStream.pipe(transForm);
+        });
+
+        it('it transforms a new line file into JSON objects correctly handling weird chunk sizes', function (done) {
+
+            var fileStream = Fs.createReadStream('./test/fixtures/test_01.log', { encoding: 'utf8', highWaterMark: 128 });
+            var transForm = new Util.Liner({});
+            var contents = [];
+
+            transForm.on('readable', function () {
+
+                var line;
+
+                while (line = this.read()) {
+                    contents.push(line);
+                }
+            });
+
+            transForm.on('end', function () {
+
+                expect(this._size).to.equal(503);
+                expect(contents).to.deep.equal([{
+                    event: 'request',
+                    timestamp: 1369328752975,
+                    id: '1369328752975-42369-3828',
+                    instance: 'http://localhost:8080',
+                    labels: [
+                        'api',
+                        'http'
+                    ],
+                    method: 'get',
+                    path: '/test',
+                    query: {},
+                    source: {
+                        remoteAddress: '127.0.0.1'
+                    },
+                    responseTime: 71,
+                    statusCode: 200
+                },
+                    {
+                        event: 'request',
+                        timestamp: 1369328753222,
+                        id: '1369328753222-42369-62002',
+                        instance: 'http://localhost:8080',
+                        labels: [
+                            'api',
+                            'http'
+                        ],
+                        method: 'get',
+                        path: '/test',
+                        query: {},
+                        source: {
+                            remoteAddress: '127.0.0.1'
+                        },
+                        responseTime: 9,
+                        statusCode: 200
+                    }]);
+                done();
+            });
+
+            fileStream.pipe(transForm);
+        });
+
+        it('filters out invalid JSON objects', function (done) {
+
+            var fileStream = Fs.createReadStream('./test/fixtures/test_01.log', { encoding: 'utf8' });
+            var transForm = new Util.Liner();
+            var contents = [];
+            var tryParse = Util.Liner.prototype._tryParse;
+            var count = 0;
+            var consoleError = console.error;
+
+            Util.Liner.prototype._tryParse = function (item) {
+
+                count++;
+
+                if (count === 1) {
+                    item = '';
+                }
+                else {
+                    item += '}';
+                }
+
+                tryParse(item);
+            };
+
+            console.error = function (value) {
+
+                expect(value.message).to.equal('Unexpected token }');
+            };
+
+            transForm.on('readable', function () {
+
+                var line;
+
+                while (line = this.read()) {
+                    contents.push(line);
+                }
+            });
+
+            transForm.on('end', function () {
+
+                expect(contents).to.be.empty();
+                Util.Liner.prototype._tryParse = tryParse;
+                console.error = consoleError;
+                done();
+            });
+
+            fileStream.pipe(transForm);
         });
     });
 });

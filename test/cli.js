@@ -7,7 +7,7 @@ var Hoek = require('hoek');
 var Lab = require('lab');
 var Path = require('path');
 var TestHelpers = require('./test_helpers');
-//require('./cleanup');
+require('./cleanup');
 
 
 // Declare internals
@@ -353,9 +353,8 @@ describe('Broadcast', function () {
 
         var log = TestHelpers.uniqueFilename();
         var broadcast = null;
-
         var stream = Fs.createWriteStream(log, { flags: 'a' });
-        console.log(log);
+
         stream.write(TestHelpers.inlineLogEntry.lineOne.toString());
         stream.write('\n' + TestHelpers.inlineLogEntry.lineTwo.toString());
 
@@ -363,6 +362,8 @@ describe('Broadcast', function () {
 
             expect(request.payload.schema).to.equal('good.v1');
             expect(request.payload.events[0].id).to.equal(TestHelpers.inlineLogEntry.lineThree.id);
+            expect(request.payload.events).to.have.length(1);
+            reply().code(200);
             broadcast.kill('SIGUSR2');
         });
 
@@ -375,12 +376,10 @@ describe('Broadcast', function () {
                 newOnly: true
             });
 
-            //broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
-            broadcast = ChildProcess.spawn('node-debug', [broadcastPath, '-c', config]);
+            broadcast = ChildProcess.spawn(process.execPath, [broadcastPath, '-c', config]);
             broadcast.stderr.on('data', function (data) {
 
-                console.log(data + '');
-                //expect(data.toString()).to.not.exist();
+                expect(data.toString()).to.not.exist();
             });
 
             broadcast.once('close', function(code) {
@@ -392,7 +391,7 @@ describe('Broadcast', function () {
             setTimeout(function () {
 
                 stream.write('\n' + TestHelpers.inlineLogEntry.lineThree.toString());
-            }, 300);
+            }, 1000);
         });
     });
 
